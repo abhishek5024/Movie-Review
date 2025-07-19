@@ -26,7 +26,8 @@ public class MovieService {
         return repository.save(movie);
     }
 
-    public void deleteMovie(String id) {
+    public boolean deleteMovie(String id) {
         repository.deleteById(id);
+        return false;
     }
 }

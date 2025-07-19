@@ -3,14 +3,14 @@ package com.movie.movie.controller;
 import com.movie.movie.model.Movie;
 import com.movie.movie.service.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/movies")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:3000")
 public class MovieController {
 
     @Autowired
@@ -22,8 +22,10 @@ public class MovieController {
     }
 
     @GetMapping("/{id}")
-    public Optional<Movie> getMovieById(@PathVariable String id) {
-        return service.getMovieById(id);
+    public ResponseEntity<Movie> getMovieById(@PathVariable Long id) {
+        return service.getMovieById(String.valueOf(id))
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
@@ -32,7 +34,8 @@ public class MovieController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteMovie(@PathVariable String id) {
-        service.deleteMovie(id);
+    public ResponseEntity<Void> deleteMovie(@PathVariable Long id) {
+        boolean deleted = service.deleteMovie(String.valueOf(id));
+        return deleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
     }
 }
