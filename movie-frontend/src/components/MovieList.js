@@ -1,26 +1,43 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { fetchMovieById } from '../services/api';
+import { Link } from 'react-router-dom';
+import { fetchMovies } from '../services/api';
+import MovieCard from './MovieCard';
 
-const MovieDetails = () => {
-  const { id } = useParams();
-  const [movie, setMovie] = useState(null);
+const MovieList = () => {
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchMovieById(id)
-      .then((res) => setMovie(res.data))
-      .catch((err) => console.error('Failed to fetch movie:', err));
-  }, [id]);
+    fetchMovies()
+      .then((res) => {
+        setMovies(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch movies:', err);
+        setError('Failed to load movies. Please make sure the backend server is running.');
+        setLoading(false);
+      });
+  }, []);
 
-  if (!movie) return <p>Loading...</p>;
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p style={{color: 'red'}}>{error}</p>;
 
   return (
-    <div>
-      <h2>{movie.title}</h2>
-      <p>{movie.description}</p>
-      <p>Release Date: {movie.releaseDate}</p>
+    <div style={{ padding: '20px' }}>
+      <h1>Movie Collection</h1>
+      {movies.length === 0 ? (
+        <p>No movies found. The backend might not have any data or might not be running.</p>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+          {movies.map((movie) => (
+            <MovieCard key={movie.id} movie={movie} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
-export default MovieDetails;
+export default MovieList;
